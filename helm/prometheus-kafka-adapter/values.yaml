@@ -2,12 +2,12 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-replicaCount: 1
+replicaCount: 4
 
 image:
-  repository: telefonica/prometheus-kafka-adapter
-  tag: 1.7.0
-  pullPolicy: IfNotPresent
+  repository: eu.gcr.io/ccp-prod-239910/prometheus-kafka-adapter
+  tag: "latest"
+  pullPolicy: Always
 
 imagePullSecrets: []
 nameOverride: ""
@@ -33,9 +33,9 @@ KAFKA_SSL_CA_CERT:
 
 environment:
   # defines kafka endpoint and port, defaults to kafka:9092.
-  KAFKA_BROKER_LIST: ""
+  KAFKA_BROKER_LIST: "druid-kafka-0.druid-kafka-headless.druid.svc.cluster.local:9092,druid-kafka-1.druid-kafka-headless.druid.svc.cluster.local:9092,druid-kafka-2.druid-kafka-headless.druid.svc.cluster.local:9092"
   # defines kafka topic to be used, defaults to metrics.
-  KAFKA_TOPIC: ""
+  KAFKA_TOPIC: "metrics"
   # defines the compression type to be used, defaults to none.
   KAFKA_COMPRESSION:
   # defines the number of messages to batch write, defaults to 10000.
@@ -49,9 +49,9 @@ environment:
   # basic auth password to be used for receive endpoint, default is no basic auth.
   BASIC_AUTH_PASSWORD:
   # defines log level for logrus, can be debug, info, warn, error, fatal or panic, defaults to info.
-  LOG_LEVEL:
+  LOG_LEVEL: "warn"
   # manage gin debug logging, can be debug or release, defaults to debug
-  GIN_MODE:
+  GIN_MODE: release
   # Kafka SSL client certificate file, defaults to "/client_cert/ssl_client_cert.pem" if
   # KAFKA_SSL_CLIENT_CERT is provided, "" otherwise
   KAFKA_SSL_CLIENT_CERT_FILE:
@@ -73,10 +73,12 @@ serviceAccount:
   # If not set and create is true, a name is generated using the fullname template
   name:
 
-podSecurityContext: {}
+podSecurityContext:
+  {}
   # fsGroup: 2000
 
-securityContext: {}
+securityContext:
+  {}
   # capabilities:
   #   drop:
   #   - ALL
@@ -92,17 +94,17 @@ service:
   port: 80
   annotations: {}
 
-resources: {}
+resources:
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
   # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
+  limits:
+    cpu: 1000m
+    memory: 2048Mi
+  requests:
+    cpu: 100m
+    memory: 1024Mi
 
 nodeSelector: {}
 
