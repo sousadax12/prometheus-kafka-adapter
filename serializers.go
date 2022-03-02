@@ -56,19 +56,24 @@ func Serialize(s Serializer, req *prompb.WriteRequest) (map[string][][]byte, err
 
 			epoch := time.Unix(sample.Timestamp/1000, 0).UTC()
 			m := map[string]interface{}{
-				"timestamp": epoch.Format(time.RFC3339),
-				"value":     strconv.FormatFloat(sample.Value, 'f', -1, 64),
-				"name":      name,
-				"labels":    labels,
+				"_timestamp_": epoch.Format(time.RFC3339),
+				"value":       strconv.FormatFloat(sample.Value, 'f', -1, 64),
+				"name":        name,
+				"labels":      labels,
+			}
+
+			if m["value"] == nil || m["value"] == "" {
+				logrus.Errorln("time series with no value")
 			}
 
 			data, err := s.Marshal(m)
 			if err != nil {
 				serializeFailed.Add(float64(1))
 				logrus.WithError(err).Errorln("couldn't marshal timeseries")
+			} else {
+				serializeTotal.Add(float64(1))
+				result[t] = append(result[t], data)
 			}
-			serializeTotal.Add(float64(1))
-			result[t] = append(result[t], data)
 		}
 	}
 
